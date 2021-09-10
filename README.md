@@ -1,3 +1,6 @@
+Results showing how metrics change for different hyper parameter values. 
+This is done for three different image sizes and train test ratio.
+
 Image size is:
 (8, 8)
 Image Size  Train-Test Split  Gamma val  Accuracy                 F1 Score
@@ -49,3 +52,7 @@ Image Size  Train-Test Split  Gamma val  Accuracy                 F1 Score
 Fitting 5 folds for each of 5 candidates, totalling 25 fits
 Best Estimators:
  SVC(gamma=0.001)# mnist-example
+
+From the above data we can see that with gamma value 0.001 we have achieved the best accuracy.
+As we move towards lower gamma value, we achieve better accuracy. 
+
