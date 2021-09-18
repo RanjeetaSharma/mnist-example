@@ -62,27 +62,28 @@ for ax, image, label in zip(axes, digits.images, digits.target):
 
 # flatten the images
 n_samples = len(digits.images)
-print("Image size is:")
+print("size of the Image is:")
 print(digits.images[0].shape)
 
+#resize_imgs=[]
 rescale_val = [1, 2, 3]
 test_split = [0.2, 0.3, 0.4]
 gamma_val= [1, 0.1, 0.01, 0.001, 10]
+
 print("Image Size  Train-Test Split  Gamma val  Accuracy\t\t  F1 Score")
 for val in rescale_val:
-    resized_images=[]
+    resize_imgs = []
     for img  in digits.images:
-        resized_images.append(rescale(img,val, anti_aliasing=False))
+        #resize_imgs= []
+        resize_imgs.append(rescale(img,val, anti_aliasing=False))
     for test in test_split:
-        
-
-        resized_images = np.array(resized_images)
-        data = resized_images.reshape((n_samples, -1))
+        resize_imgs = np.array(resize_imgs)
+        data = resize_imgs.reshape((n_samples, -1))
         for g in gamma_val:
             # Create a classifier: a support vector classifier
             clf = svm.SVC(gamma= g)
 
-            # Split data into 50% train and 50% test subsets
+            # Split data into train and test subsets
             X_train, X_test, y_train, y_test = train_test_split(
                 data, digits.target, test_size=test, shuffle=False)
 
@@ -99,7 +100,7 @@ for val in rescale_val:
             _, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
             for ax, image, prediction in zip(axes, X_test, predicted):
                 ax.set_axis_off()
-                image = image.reshape(resized_images[0].shape)
+                image = image.reshape(resize_imgs[0].shape)
                 ax.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
                 ax.set_title(f'Prediction: {prediction}')
 
@@ -120,10 +121,11 @@ for val in rescale_val:
 
             acc = metrics.accuracy_score(y_pred=predicted, y_true=y_test)
             f1 = metrics.f1_score(y_pred=predicted, y_true=y_test, average='macro')
-            print("{}x{}\t\t{}:{}\t{}\t{}\t{}".format(resized_images[0].shape[0], resized_images[0].shape[1], (1-test)*100,test*100,g,acc*100,f1*100))
+            print("{}x{}\t\t{}:{}\t{}\t{}\t{}".format(resize_imgs[0].shape[0], resize_imgs[0].shape[1], (1-test)*100,test*100,g,acc*100,f1*100))
 
             plt.show()
 
+## Finding the best estimatior
 param_grid = { 'gamma': [1, 0.1, 0.01, 0.001, 10]}
 # Make grid search classifier
 
@@ -134,4 +136,3 @@ clf_grid.fit(X_train, y_train)
 # clf = grid.best_estimator_()
 
 print("Best Estimators:\n", clf_grid.best_estimator_)
-
