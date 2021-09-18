@@ -70,14 +70,14 @@ test_split = [0.2, 0.3, 0.4]
 gamma_val= [1, 0.1, 0.01, 0.001, 10]
 print("Image Size  Train-Test Split  Gamma val  Accuracy\t\t  F1 Score")
 for val in rescale_val:
-    resized_images=[]
+    resize_imgs=[]
     for img  in digits.images:
-        resized_images.append(rescale(img,val, anti_aliasing=False))
+        resize_imgs.append(rescale(img,val, anti_aliasing=False))
     for test in test_split:
         
 
-        resized_images = np.array(resized_images)
-        data = resized_images.reshape((n_samples, -1))
+        resize_imgs = np.array(resize_imgs)
+        data = resize_imgs.reshape((n_samples, -1))
         for g in gamma_val:
             # Create a classifier: a support vector classifier
             clf = svm.SVC(gamma= g)
@@ -120,7 +120,7 @@ for val in rescale_val:
 
             acc = metrics.accuracy_score(y_pred=predicted, y_true=y_test)
             f1 = metrics.f1_score(y_pred=predicted, y_true=y_test, average='macro')
-            print("{}x{}\t\t{}:{}\t{}\t{}\t{}".format(resized_images[0].shape[0], resized_images[0].shape[1], (1-test)*100,test*100,g,acc*100,f1*100))
+            print("{}x{}\t\t{}:{}\t{}\t{}\t{}".format(resize_imgs[0].shape[0], resize_imgs[0].shape[1], (1-test)*100,test*100,g,acc*100,f1*100))
 
             plt.show()
 
