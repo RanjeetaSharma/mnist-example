@@ -23,7 +23,7 @@ from skimage.transform import rescale
 import numpy as np
 import pickle
 import os
-from util import pre_processing,split_data,test
+from util import pre_processing,split_data,test,run_classification_exp
 
 
 ###############################################################################
@@ -84,8 +84,8 @@ for rescale_factor in rescale_val:
     X_train,X_test,X_val,y_train,y_test,y_val = split_data(data, digits.target,0.3,0.1)
     # Learn the digits on the train subset
     clf.fit(X_train, y_train)
-    test_metrics = test(clf,X_test,y_test)
-    val_metrics = test(clf,X_val,y_val)
+    test_metrics = metric_test(clf,X_test,y_test)
+    val_metrics = metric_test(clf,X_val,y_val)
     print("{}\t\t{}\t{}\t{}\t{}".format(val,test_metrics['Accuracy'],test_metrics['f1_score'],val_metrics['Accuracy'],val_metrics['f1_score']))
     # print(test_metrics)
     # best_gamma.append(val)
@@ -100,6 +100,7 @@ for rescale_factor in rescale_val:
     pickle.dump(clf, open('/home/ranjeeta/miniconda3/mnist-example/mnist/mnist/model/finalized_model','wb')
             )
     print('Model is saved into to disk successfully Using Pickle')
+    metrics_valid = run_classification_exp(clf, X_train, y_train, X_val, y_val, val, '/home/ranjeeta/miniconda3/mnist-example/mnist/mnist/model/finalized_model')
     if val_metrics['Accuracy'] > best_accuracy:
        best_gamma = val
        best_accuracy = val_metrics['Accuracy']

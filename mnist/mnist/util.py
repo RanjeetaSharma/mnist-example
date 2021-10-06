@@ -1,6 +1,10 @@
 from skimage.transform import rescale
 from sklearn.model_selection import train_test_split
 from sklearn import datasets, svm, metrics
+import numpy as np
+import os
+from joblib import dump, load
+import pickle
 
 def pre_processing(imgs, rescale_factor):
   rescale_imgs =[]
@@ -31,3 +35,18 @@ def test(clf,X_test,y_test):
     f1_test = metrics.f1_score(y_pred=predicted_test, y_true=y_test, average='macro')
 
     return {'Accuracy':acc_test,'f1_score':f1_test}
+
+def run_classification_exp(classifier, X_train, y_train, X_val, y_val, gamma, filename):
+    random_acc = max(np.bincount(y_val)) / len(y_val)
+    ## create a svm classifier
+    clf = svm.SVC(gamma=gamma)
+    clf.fit(X_train, y_train)
+    #Predict values on val subset
+    valid_metrics = test(clf, X_val, y_val)
+    if valid_metrics["Accuracy"] < random_acc:
+        print("Ski for {}".format(gamma))
+        return None
+
+    out_folder = os.path.dirname(filename)
+    pickle.dump(clf, open(filename,'wb'))
+    return valid_metrics
