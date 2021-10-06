@@ -23,7 +23,7 @@ from skimage.transform import rescale
 import numpy as np
 import pickle
 import os
-from util import pre_processing,split_data,test
+from util import pre_processing,split_data,test,run_classification_exp
 
 
 ###############################################################################
