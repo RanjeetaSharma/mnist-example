@@ -1,6 +1,8 @@
 from skimage.transform import rescale
 from sklearn.model_selection import train_test_split
 from sklearn import datasets, svm, metrics
+import numpy as np
+import os
 import pickle
 
 def pre_processing(imgs, rescale_factor):
