@@ -1,4 +1,4 @@
-Image size is:
+size of the Image is:
 (8, 8)
 Image Size  Train-Test Split  Gamma val  Accuracy                 F1 Score
 8x8             80.0:20.0       1       10.277777777777777      1.8639798488664987
@@ -48,4 +48,6 @@ Image Size  Train-Test Split  Gamma val  Accuracy                 F1 Score
 24x24           60.0:40.0       10      9.874826147426981       1.7974683544303796
 Fitting 5 folds for each of 5 candidates, totalling 25 fits
 Best Estimators:
- SVC(gamma=0.001)# mnist-example
+ SVC(gamma=0.001
+
+From the above results, we can see that for Gamma value = 0.001 we have achieved better performance as compared to other values.Also, gamma=0.001 has been found as the best estimator.)
