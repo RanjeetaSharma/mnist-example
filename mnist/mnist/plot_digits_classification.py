@@ -100,6 +100,7 @@ for rescale_factor in rescale_val:
     pickle.dump(clf, open('/home/ranjeeta/miniconda3/mnist-example/mnist/mnist/model/finalized_model','wb')
             )
     print('Model is saved into to disk successfully Using Pickle')
+    metrics_valid = run_classification_exp(clf, X_train, y_train, X_val, y_val, val, '/home/ranjeeta/miniconda3/mnist-example/mnist/mnist/model/finalized_model')
     if val_metrics['Accuracy'] > best_accuracy:
        best_gamma = val
        best_accuracy = val_metrics['Accuracy']
