@@ -19,5 +19,8 @@ def test_create_split():
     val_data = len(x_val)
     data_len = len(x)
     assert train_data == math.trunc(data_len*0.7)
+    assert test_data == math.trunc(data_len*0.2)
+    assert val_data == math.trunc(data_len*0.1)
+    assert train_data + test_data + val_data = data_len
 
 
