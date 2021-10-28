@@ -1,9 +1,3 @@
-================================
-Recognizing hand-written digits
-================================
-This example shows how scikit-learn can be used to recognize images of
-hand-written digits, from 0-9.
-
 Image size is:
 (8, 8)
 Train-Test Split  Accuracy (DT)          Accuracy (SVM)
@@ -16,3 +10,5 @@ Mean of Decision Tree Classsifier: 73.77201112140871
 Mean of SVM Classsifier: 95.73679332715477
 Standard Deviation of Decision Tree Classsifier: 0.0
 Standard Deviation of SVM Classsifier: 0.0
+
+Standard Deviation 0 means that the list of numbers don tlie apart and they all are equal.
