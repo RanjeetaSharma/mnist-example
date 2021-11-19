@@ -79,3 +79,29 @@ def test_digit_correct_svm_8():
 def test_digit_correct_dt_2():
     pred_svm_dt_2 = clf.predict(X_test)
     assert pred_svm_dt_2==0:
+
+def test_digit_correct_dt_3():
+    pred_svm_dt_3 = clf.predict(X_test)
+    assert pred_svm_dt_3==0:
+
+def test_digit_correct_dt_4():
+    pred_svm_dt_4 = clf.predict(X_test)
+    assert pred_svm_dt_4==0:
+
+def test_digit_correct_dt_5():
+    pred_svm_dt_5 = clf.predict(X_test)
+    assert pred_svm_dt_5==0:
+def test_digit_correct_dt_6():
+    pred_svm_dt_6 = clf.predict(X_test)
+    assert pred_svm_dt_6==0:
+
+def test_digit_correct_dt_7():
+    pred_svm_dt_7 = clf.predict(X_test)
+    assert pred_svm_dt_7==0:
+
+def test_digit_correct_dt_8():
+    pred_svm_dt_8 = clf.predict(X_test)
+    assert pred_svm_dt_8==0:
+def test_digit_correct_dt_9():
+    pred_svm_dt_9 = clf.predict(X_test)
+    assert pred_svm_dt_9==0:
