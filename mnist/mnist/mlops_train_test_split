@@ -1,0 +1,158 @@
+"""
+================================
+Recognizing hand-written digits
+================================
+This example shows how scikit-learn can be used to recognize images of
+hand-written digits, from 0-9.
+"""
+
+print(__doc__)
+
+# Author: Gael Varoquaux <gael dot varoquaux at normalesup dot org>
+# License: BSD 3 clause
+
+# Standard scientific Python imports
+import matplotlib.pyplot as plt
+
+# Import datasets, classifiers and performance metrics
+from sklearn import datasets, svm, metrics
+from sklearn.model_selection import train_test_split
+from joblib import dump, load
+from skimage import data, color
+from skimage.transform import rescale
+import numpy as np
+import pickle
+import os
+# from util import pre_processing,split_data,test,run_classification_exp
+
+
+###############################################################################
+# Digits dataset
+# --------------
+#
+# The digits dataset consists of 8x8
+# pixel images of digits. The ``images`` attribute of the dataset stores
+# 8x8 arrays of grayscale values for each image. We will use these arrays to
+# visualize the first 4 images. The ``target`` attribute of the dataset stores
+# the digit each image represents and this is included in the title of the 4
+# plots below.
+#
+# Note: if we were working from image files (e.g., 'png' files), we would load
+# them using :func:`matplotlib.pyplot.imread`.
+
+digits = datasets.load_digits()
+
+_, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
+for ax, image, label in zip(axes, digits.images, digits.target):
+    ax.set_axis_off()
+    ax.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
+    ax.set_title('Training: %i' % label)
+
+###############################################################################
+# Classification
+# --------------
+#
+# To apply a classifier on this data, we need to flatten the images, turning
+# each 2-D array of grayscale values from shape ``(8, 8)`` into shape
+# ``(64,)``. Subsequently, the entire dataset will be of shape
+# ``(n_samples, n_features)``, where ``n_samples`` is the number of images and
+# ``n_features`` is the total number of pixels in each image.
+#
+# We can then split the data into train and test subsets and fit a support
+# vector classifier on the train samples. The fitted classifier can
+# subsequently be used to predict the value of the digit for the samples
+# in the test subset.
+
+# flatten the images
+n_samples = len(digits.images)
+data = digits.images.reshape((n_samples, -1))
+print("size of the Image is:")
+print(digits.images[0].shape)
+rescale_val = [1]
+gamma_val= [0.1, 0.01, 0.001]
+
+## Define a function to split train test set
+
+def pre_processing(imgs, rescale_factor):
+  rescale_imgs =[]
+  for img in imgs:
+      rescale_imgs.append(rescale(img,rescale_factor, anti_aliasing=False))
+  return rescale_imgs
+
+def split_data(data, target,test_size,val_size):
+
+  # Split data into 70% train and 30% test subsets
+  X_train, X_test, y_train, y_test = train_test_split(
+    data, target, test_size=test_size, shuffle=False)
+  
+  # Split data into 20% validation set and 10% test set
+  X_test, X_val, y_test, y_val = train_test_split(
+    X_test, y_test, test_size=val_size, shuffle=False)
+  return X_train,X_test,X_val,y_train,y_test,y_val
+
+def test(clf,X_test,y_test):
+  # Predict the value of the digit on the test subset
+    predicted_test = clf.predict(X_test)
+    acc_test = metrics.accuracy_score(y_pred=predicted_test, y_true=y_test)
+    f1_test = metrics.f1_score(y_pred=predicted_test, y_true=y_test, average='macro')
+
+    return {'Accuracy':acc_test,'f1_score':f1_test}
+def metric_test(clf,X_test,y_test):
+  # Predict the value of the digit on the test subset
+    predicted_test = clf.predict(X_test)
+    acc_test = metrics.accuracy_score(y_pred=predicted_test, y_true=y_test)
+    return {'Accuracy':acc_test}
+
+def metric_train(clf,X_test,y_test):
+  # Predict the value of the digit on the test subset
+    predicted_train = clf.predict(X_train)
+    acc_train = metrics.accuracy_score(y_pred=predicted_train, y_true=y_train)
+    return {'Accuracy':acc_train}
+    
+def metric_dev(clf,X_test,y_test):
+  # Predict the value of the digit on the test subset
+    predicted_val = clf.predict(X_val)
+    acc_dev = metrics.accuracy_score(y_pred=predicted_val, y_true=y_val)
+    return {'Accuracy':acc_dev}
+
+    return {'Accuracy':acc_test,'f1_score':f1_test}
+def run_classification_exp(clf, X_train, y_train, X_val, y_val, gamma, filename):
+    random_acc = max(np.bincount(y_val)) / len(y_val)
+    ## create a svm classifier
+    clf = svm.SVC(gamma=gamma)
+    clf.fit(X_train, y_train)
+    #Predict values on val subset
+    valid_metrics = metric_test(clf, X_val, y_val)
+    if valid_metrics["Accuracy"] < random_acc:
+        print("Ski for {}".format(gamma))
+        return None
+
+    out_folder = os.path.dirname(filename)
+    pickle.dump(clf, open(filename,'wb'))
+    return valid_metrics
+run=0
+print("Gamma Value1\tTrain Accuracy\t\tTest Accuracy\t\tDev Accuracy\t\t")
+while run <=2:
+  for rescale_factor in rescale_val:
+    for val in gamma_val:
+      rescale_imgs = pre_processing(digits.images, rescale_factor)
+      rescale_imgs = np.array(rescale_imgs)
+      data = rescale_imgs.reshape((n_samples, -1))
+      # Create a classifier: a support vector classifier
+      clf = svm.SVC(gamma=val)
+      X_train,X_test,X_val,y_train,y_test,y_val = split_data(data, digits.target,0.3,0.15)
+      # Learn the digits on the train subset
+      clf.fit(X_train, y_train)
+      test_metrics = metric_test(clf,X_test,y_test)
+      train_metrics = metric_train(clf,X_train,y_train)
+      dev_metrics = metric_test(clf,X_val,y_val)
+      mean_train= np.mean(round(train_metrics['Accuracy']*100,2))
+      mean_test= np.mean(round(test_metrics['Accuracy']*100,2))
+      mean_dev= np.mean(round(dev_metrics['Accuracy']*100,2))
+      print("This is Run#:",run)
+      print("{}\t\t{}\t\t\t{}\t\t\t{}".format(val,round(train_metrics['Accuracy']*100,2),round(test_metrics['Accuracy']*100,2),dev_metrics['Accuracy']*100))
+      print("Mean Accuracy Train", mean_train)
+      print("Mean Accuracy Test", mean_test)
+      print("Mean Accuracy Dev", mean_dev)
+  run = run+1
+print("There is a overfitting as we are getting 100% training accuracy")

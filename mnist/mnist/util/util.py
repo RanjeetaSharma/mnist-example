@@ -1,10 +1,6 @@
 from skimage.transform import rescale
 from sklearn.model_selection import train_test_split
 from sklearn import datasets, svm, metrics
-import numpy as np
-import os
-from joblib import dump, load
-import pickle
 
 def pre_processing(imgs, rescale_factor):
   rescale_imgs =[]
@@ -28,6 +24,13 @@ def split_data(data, target,test_size,val_size):
 
 ## Define Test function to calculate metrics on test set
 
+def test(clf,X_test,y_test):
+  # Predict the value of the digit on the test subset
+    predicted_test = clf.predict(X_test)
+    acc_test = metrics.accuracy_score(y_pred=predicted_test, y_true=y_test)
+    f1_test = metrics.f1_score(y_pred=predicted_test, y_true=y_test, average='macro')
+
+    return {'Accuracy':acc_test,'f1_score':f1_test}
 def metric_test(clf,X_test,y_test):
   # Predict the value of the digit on the test subset
     predicted_test = clf.predict(X_test)
@@ -50,3 +53,6 @@ def run_classification_exp(clf, X_train, y_train, X_val, y_val, gamma, filename)
     out_folder = os.path.dirname(filename)
     pickle.dump(clf, open(filename,'wb'))
     return valid_metrics
+
+def load(model_path):
+     return pickle.load(open(model_path, 'rb'))
