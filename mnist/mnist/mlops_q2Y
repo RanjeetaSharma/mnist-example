@@ -62,7 +62,6 @@ def split_dataset(data, targets):
 
   return x_train, y_train, x_test, y_test, x_val, y_val
 
-
 x_train, y_train, x_test, y_test, x_val, y_val = split_dataset(data, digits.target)
 
 clf       = MLPClassifier(alpha=1, max_iter=2)
@@ -81,7 +80,4 @@ test_predict   = clf.predict(x_test)
 test_accuracy = metrics.accuracy_score(y_pred = test_predict, y_true = y_test)
 test_acc_arr.append(test_accuracy)
 
-print ("{:<20} {:<20} {:<30}".format('Train', 'Dev', 'Test'))
-print('-----------------------------------------------')
 
-print (train_acc_arr[0], '\t', valid_acc_arr[0], '\t', test_acc_arr[0])
