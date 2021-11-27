@@ -53,7 +53,9 @@ digits = datasets.load_digits()
 # flatten the images
 n_samples = len(digits.images)
 data      = digits.images.reshape((n_samples, -1))
-
+test_acc  = []
+valid_acc = []
+train_acc = []
 
 def split_dataset(data, targets):
   x_train, x_test, y_train, y_test = train_test_split(data, targets, test_size=0.15, random_state=123)
@@ -69,19 +71,19 @@ clf       = MLPClassifier(alpha=1, max_iter=2)
 
 clf.fit(x_train, y_train)
 
-predicted = clf.predict(x_val)
-valid_accuracy = metrics.accuracy_score(y_pred = predicted, y_true = y_val)
-valid_acc_arr.append(valid_accuracy)
+pred = clf.predict(x_val)
+valid_acc = metrics.accuracy_score(y_pred = pred, y_true = y_val)
+valid_acc.append(valid_acc)
 
-train_predict = clf.predict(x_train)
-train_accuracy = metrics.accuracy_score(y_pred = train_predict, y_true = y_train)
-train_acc_arr.append(train_accuracy)
+train_pred = clf.predict(x_train)
+train_acc = metrics.accuracy_score(y_pred = train_pred, y_true = y_train)
+train_acc.append(train_acc)
 
-test_predict   = clf.predict(x_test)
-test_accuracy = metrics.accuracy_score(y_pred = test_predict, y_true = y_test)
-test_acc_arr.append(test_accuracy)
+test_pred   = clf.predict(x_test)
+test_acc = metrics.accuracy_score(y_pred = test_pred, y_true = y_test)
+test_acc.append(test_acc)
 
-print ("{:<20} {:<20} {:<30}".format('Train', 'Dev', 'Test'))
+print ("{:<10} {:<10} {:<20}".format('Train', 'Dev', 'Test'))
 print('-----------------------------------------------')
 
-print (train_acc_arr[0], '\t', valid_acc_arr[0], '\t', test_acc_arr[0])
+print (train_acc[0], '\t', valid_acc[0], '\t', test_acc[0])
