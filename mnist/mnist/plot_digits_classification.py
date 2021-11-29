@@ -11,20 +11,15 @@ print(__doc__)
 # Author: Gael Varoquaux <gael dot varoquaux at normalesup dot org>
 # License: BSD 3 clause
 
-# Standard scientific Python imports
-import matplotlib.pyplot as plt
-
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
-from joblib import dump, load
-from skimage import data, color
-from skimage.transform import rescale
-import numpy as np
-import pickle
-import os
-from util import pre_processing,split_data,test
-
+from sklearn import tree
+from sklearn.metrics import f1_score
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sn
+import matplotlib.pyplot as plt
 
 ###############################################################################
 # Digits dataset
@@ -41,12 +36,6 @@ from util import pre_processing,split_data,test
 # them using :func:`matplotlib.pyplot.imread`.
 
 digits = datasets.load_digits()
-
-_, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
-for ax, image, label in zip(axes, digits.images, digits.target):
-    ax.set_axis_off()
-    ax.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
-    ax.set_title('Training: %i' % label)
 
 ###############################################################################
 # Classification
@@ -65,57 +54,83 @@ for ax, image, label in zip(axes, digits.images, digits.target):
 
 # flatten the images
 n_samples = len(digits.images)
-data = digits.images.reshape((n_samples, -1))
-print("size of the Image is:")
-print(digits.images[0].shape)
-rescale_val = [1]
-gamma_val= [1, 0.1, 0.01, 0.001, 10]
-best_gamma = 0
-best_accuracy = 0
-best_f1_score = 0
-print("Gamma Value\tTest Accuracy\t\tTest F1 Score\t\tValidation Accuracy\tValidation F1 Score")
-for rescale_factor in rescale_val:
-  for val in gamma_val:
-    rescale_imgs = pre_processing(digits.images, rescale_factor)
-    rescale_imgs = np.array(rescale_imgs)
-    data = rescale_imgs.reshape((n_samples, -1))
-    # Create a classifier: a support vector classifier
-    clf = svm.SVC(gamma=val)
-    X_train,X_test,X_val,y_train,y_test,y_val = split_data(data, digits.target,0.3,0.1)
-    # Learn the digits on the train subset
-    clf.fit(X_train, y_train)
-    test_metrics = test(clf,X_test,y_test)
-    val_metrics = test(clf,X_val,y_val)
-    print("{}\t\t{}\t{}\t{}\t{}".format(val,test_metrics['Accuracy'],test_metrics['f1_score'],val_metrics['Accuracy'],val_metrics['f1_score']))
-    # print(test_metrics)
-    # best_gamma.append(val)
-    # best_accuracy.append(acc)
-    #Discard the models that yield random-like performance
+data      = digits.images.reshape((n_samples, -1))
 
-    if val_metrics['Accuracy'] < 0.11:
-       print("Discard for {}".format(val))
-       continue
-    # save the model to disk
-    filename = 'finalized_model.sav'
-    pickle.dump(clf, open('/home/ranjeeta/miniconda3/mnist-example/mnist/mnist/model/finalized_model','wb')
-            )
-    print('Model is saved into to disk successfully Using Pickle')
-    if val_metrics['Accuracy'] > best_accuracy:
-       best_gamma = val
-       best_accuracy = val_metrics['Accuracy']
-       best_f1_score = val_metrics['f1_score']
+def split_data(data, target):
+  X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2, random_state=42)
+  
+  X_train, X_val, y_train, y_val   = train_test_split(X_train, y_train, test_size=0.5, random_state=42)
 
-    # Load Model from the disk
-    my_model = pickle.load(open('/home/ranjeeta/miniconda3/mnist-example/mnist/mnist/model/finalized_model','rb'))
-    result = my_model.predict(X_val)
-    acc = metrics.accuracy_score(y_pred=result, y_true=y_val)
-    f1 = metrics.f1_score(y_pred=result, y_true=y_val, average="macro")
-    print("Validation Accuracy using saved Model",acc)
-    print("Validation F1 Score using saved Model",f1)
+  return X_train, y_train, X_test, y_test, X_val, y_val
 
-print("The best gamma value is:",best_gamma)     
-print("The best Validation accuracy value is:",best_accuracy)  
-print("The best Validation F1 Score value is:",best_f1_score)  
+def train_split(X_train, y_train, test_size):
+  train_X, test_X, train_y, test_y = train_test_split(X_train, y_train, test_size = test_size, random_state=42)
+  return train_X, train_y
+
+X_train, y_train, X_test, y_test, X_val, y_val = split_data(data, digits.target)
+
+samples_train  = []
+pred   = []
+train_accuracy = []
+test_accuracy  = []
+val_accuracy = []
+f1_score_metric  = []
 
 
+for i in range (10):
+  test_size = 1 - ((i + 1) / 10)
 
+  if i == 9:
+    train_X = X_train
+    train_y = y_train
+  else:
+    train_X, train_y = train_split(X_train, y_train, test_size = test_size)
+
+  samples_train.append(((i + 1) / 10) * 100)
+
+  clf = tree.DecisionTreeClassifier()
+  clf.fit(train_X, train_y)
+
+  prediction      = clf.predict(X_val)
+  acc_val = metrics.accuracy_score(y_pred = prediction, y_true = y_val)
+  val_accuracy.append(acc_val)
+
+  train_pred  = clf.predict(train_X)
+  train_acc = metrics.accuracy_score(y_pred = train_pred, y_true = train_y)
+  train_accuracy.append(train_acc)
+
+  test_pred  = clf.predict(X_test)
+
+  test_acc = metrics.accuracy_score(y_pred = test_pred, y_true = y_test)
+  f1_score      = metrics.f1_score(y_test, test_pred, average = 'macro')
+
+  test_accuracy.append(test_acc)
+  f1_score_metric.append(f1_score)
+  pred.append(test_pred)
+
+x_axis = samples_train
+y_axis = f1_score_metric
+
+plt.figure(figsize=(8, 6))
+plt.title('Training Samples v/s F1 Score')
+plt.xlabel('X axis - Training Samples')
+plt.ylabel('Y axis - f1 Score')
+plt.xlim(0, 100)
+plt.plot(x_axis, y_axis, color = 'blue')
+plt.show()
+
+
+print ("{:<15} {:<17} {:<20} {:<17} {:18}".format('Run', 'Train', 'Test', 'Val', 'F1 Score'))
+print('=============================================================================================================================')
+
+for i in range (10):
+  print ((i + 1), '\t \t', round(train_accuracy[i]*100,2),'\t \t', round(test_accuracy[i]*100,2),'\t\t', round(val_accuracy[i]*100,2),'\t\t', round(f1_score_metric[i]*100,2))
+
+
+print('Confusion Matrix')
+print ('\n')
+
+print('Training Samples: 30%')
+confusion_mat = metrics.confusion_matrix(y_test, pred[2])
+sn.heatmap(confusion_mat, annot=True)
+print ('\n')
